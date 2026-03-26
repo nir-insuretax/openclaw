@@ -1,0 +1,72 @@
+// OpenClaw Gateway — Voice-Call Extension Configuration for Norma
+// AI-368: Norma Outbound Voice Calling MVP
+//
+// This config is merged into the gateway's plugins.entries["voice-call"].config.
+// Credentials are resolved from environment variables (see resolveVoiceCallConfig).
+//
+// Required environment variables:
+//   TELNYX_API_KEY        — Telnyx API v2 key
+//   TELNYX_CONNECTION_ID  — Telnyx Call Control app connection ID
+//   TELNYX_PUBLIC_KEY     — (optional) Telnyx public key for webhook verification
+//
+// To use: copy this into your gateway config.json5 under plugins.entries["voice-call"].config
+
+{
+  // Enable voice calling
+  "enabled": true,
+
+  // Provider: Telnyx (NOT Twilio)
+  "provider": "telnyx",
+
+  // Telnyx credentials (resolved from env vars if not set here)
+  // "telnyx": {
+  //   "apiKey": "...",       // or TELNYX_API_KEY
+  //   "connectionId": "...", // or TELNYX_CONNECTION_ID
+  //   "publicKey": "..."     // or TELNYX_PUBLIC_KEY
+  // },
+
+  // Norma's Telnyx phone number
+  "fromNumber": "+19177799737",
+
+  // Outbound call mode: conversation (interactive, two-way)
+  "outbound": {
+    "defaultMode": "conversation",
+    "notifyHangupDelaySec": 3
+  },
+
+  // Max call duration: 7 minutes (Norma's limit)
+  "maxDurationSeconds": 420,
+
+  // AI response generation
+  "responseModel": "anthropic/claude-sonnet-4",
+  // responseSystemPrompt is set programmatically from norma-persona.ts
+
+  // Inbound: disabled for MVP (outbound only)
+  "inboundPolicy": "disabled",
+
+  // Webhook server
+  "serve": {
+    "port": 3334,
+    "bind": "127.0.0.1",
+    "path": "/voice/webhook"
+  },
+
+  // Tunnel: configure based on deployment (ngrok for dev, tailscale for prod)
+  "tunnel": {
+    "provider": "none"
+  },
+
+  // Stale call reaper: clean up stuck calls after 5 minutes
+  "staleCallReaperSeconds": 300,
+
+  // Silence / transcript timeouts
+  "silenceTimeoutMs": 800,
+  "transcriptTimeoutMs": 180000,
+  "ringTimeoutMs": 30000,
+
+  // Max concurrent calls for MVP
+  "maxConcurrentCalls": 1,
+
+  // Webhook signature verification (enable in production)
+  "skipSignatureVerification": false
+}

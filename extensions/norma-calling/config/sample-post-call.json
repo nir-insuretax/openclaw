@@ -1,0 +1,40 @@
+{
+  "callId": "test-call-001",
+  "transcript": [
+    {
+      "speaker": "agent",
+      "text": "Hi John, this is Norma, an AI assistant calling from InsureTax. I'm reaching out because we're expanding our broker partner network in Texas, and I thought Acme Insurance might be a great fit. Do you have about two minutes?"
+    },
+    { "speaker": "user", "text": "Sure, what's this about?" },
+    {
+      "speaker": "agent",
+      "text": "We offer IRS audit insurance, backed by Lloyd's of London. It's a unique product that helps your clients protect against the cost of an IRS audit. As a broker partner, you'd earn commissions on every policy."
+    },
+    {
+      "speaker": "user",
+      "text": "That's interesting. What kind of commissions are we talking about?"
+    },
+    {
+      "speaker": "agent",
+      "text": "Commissions are typically in the 10-20% range, depending on volume. Would you like me to send you some materials with all the details?"
+    },
+    {
+      "speaker": "user",
+      "text": "Yeah, send me more information please. My email is john@acmeinsurance.com."
+    },
+    {
+      "speaker": "agent",
+      "text": "I'll get those sent over right away. Thanks for your time, John. Have a great day!"
+    },
+    { "speaker": "user", "text": "Thanks, bye." }
+  ],
+  "durationSeconds": 95,
+  "analysis": {
+    "summary": "Prospect expressed interest in broker partner program. Requested materials be sent via email.",
+    "callSuccessful": true,
+    "dataCollected": {
+      "email": "john@acmeinsurance.com",
+      "interest": "materials_requested"
+    }
+  }
+}
