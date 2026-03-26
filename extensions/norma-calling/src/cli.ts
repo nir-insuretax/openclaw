@@ -333,10 +333,14 @@ program
         requiresRecordingConsent: consent,
       });
 
-      const gatewayToken =
-        options.gatewayToken ||
-        process.env.OPENCLAW_GATEWAY_TOKEN ||
-        "7c9cd88b21c9ae2fcc3107807f02cccbe9b10a10d69e7bc6";
+      const gatewayToken = options.gatewayToken || process.env.OPENCLAW_GATEWAY_TOKEN || "";
+
+      if (!gatewayToken) {
+        console.error(
+          "Error: Gateway token not provided. Set OPENCLAW_GATEWAY_TOKEN env var or pass --gateway-token.",
+        );
+        process.exit(1);
+      }
 
       console.log("--- Norma Live Conversational Call ---");
       console.log(`To: ${options.to}`);
@@ -395,10 +399,14 @@ program
   .option("--gateway-url <url>", "Gateway base URL", "http://127.0.0.1:18789")
   .option("--gateway-token <token>", "Gateway auth token")
   .action(async (options: { callId: string; gatewayUrl: string; gatewayToken?: string }) => {
-    const gatewayToken =
-      options.gatewayToken ||
-      process.env.OPENCLAW_GATEWAY_TOKEN ||
-      "7c9cd88b21c9ae2fcc3107807f02cccbe9b10a10d69e7bc6";
+    const gatewayToken = options.gatewayToken || process.env.OPENCLAW_GATEWAY_TOKEN || "";
+
+    if (!gatewayToken) {
+      console.error(
+        "Error: Gateway token not provided. Set OPENCLAW_GATEWAY_TOKEN env var or pass --gateway-token.",
+      );
+      process.exit(1);
+    }
 
     try {
       const resp = await fetch(`${options.gatewayUrl}/tools/invoke`, {
