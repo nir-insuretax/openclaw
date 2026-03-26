@@ -46,8 +46,8 @@ function loadConfig(): NormaCallingConfig {
       apiKey: process.env.TELNYX_API_KEY || "",
       connectionId: process.env.TELNYX_CONNECTION_ID || "",
       publicKey: process.env.TELNYX_PUBLIC_KEY || "",
-      phoneNumber: process.env.TELNYX_PHONE_NUMBER || "+19177799737",
-      appId: process.env.TELNYX_APP_ID || "2923588101919999075",
+      phoneNumber: process.env.TELNYX_PHONE_NUMBER || "",
+      appId: process.env.TELNYX_APP_ID || "",
     },
     hubspot: {
       accessToken: process.env.HUBSPOT_ACCESS_TOKEN || "",
@@ -133,7 +133,18 @@ program
       rawData = Buffer.concat(chunks).toString("utf-8");
     }
 
-    const postCallData: PostCallData = JSON.parse(rawData);
+    const parsed = JSON.parse(rawData);
+    if (
+      !parsed.callId ||
+      !Array.isArray(parsed.transcript) ||
+      typeof parsed.durationSeconds !== "number"
+    ) {
+      console.error(
+        "Invalid post-call data: must have callId (string), transcript (array), durationSeconds (number)",
+      );
+      process.exit(1);
+    }
+    const postCallData: PostCallData = parsed;
     const contactId = options.contactId || "unknown";
     const phone = options.phone || "unknown";
 

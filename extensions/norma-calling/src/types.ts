@@ -19,7 +19,7 @@ export type CallDisposition =
 export interface CallOutcome {
   disposition: CallDisposition;
   summary: string;
-  interestLevel: number; // 1-5
+  interestLevel: number; // 0-5
   nextAction: string | null;
   followUpDate: Date | null;
   qualityScore: number; // 0-100

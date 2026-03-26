@@ -108,6 +108,38 @@ describe("PostCallProcessor", () => {
     expect(store.isOnDncList("+15552222222")).toBe(true);
   });
 
+  it("allows retry when HubSpot throws (webhook not marked processed)", async () => {
+    const mockLogger = createMockHubSpotLogger();
+    mockLogger.logCall.mockRejectedValueOnce(new Error("Network error"));
+
+    const processor = new PostCallProcessor(store, mockLogger as any);
+
+    const data: PostCallData = {
+      callId: "call-retry",
+      transcript: [{ speaker: "agent", text: "Hi." }],
+      durationSeconds: 60,
+      analysis: { callSuccessful: true, summary: "Good call" },
+    };
+
+    const params = { postCallData: data, hubspotContactId: "c-retry", phone: "+15554444444" };
+
+    // First attempt fails
+    await expect(processor.process(params)).rejects.toThrow("Network error");
+
+    // Webhook should NOT be marked as processed, so retry works
+    expect(store.isWebhookProcessed("call-retry")).toBe(false);
+
+    // Retry succeeds
+    mockLogger.logCall.mockResolvedValueOnce({
+      callEngagementId: "hs-retry",
+      noteId: "hs-note-retry",
+      status: "complete",
+    });
+    const result = await processor.process(params);
+    expect(result.skipped).toBeFalsy();
+    expect(store.isWebhookProcessed("call-retry")).toBe(true);
+  });
+
   it("handles HubSpot logger errors gracefully", async () => {
     const mockLogger = createMockHubSpotLogger();
     mockLogger.logCall.mockResolvedValue({

@@ -103,9 +103,13 @@ export function analyzeOutcome(data: PostCallData): CallOutcome {
     };
   }
 
-  // Rule 4: Transfer occurred
+  // Rule 4: Transfer occurred (check agent text for transfer language)
+  const agentText = transcript
+    .filter((t) => t.speaker === "agent")
+    .map((t) => t.text)
+    .join(" ");
   if (
-    fullText.toLowerCase().includes("connecting you") ||
+    agentText.toLowerCase().includes("connecting you") ||
     analysis?.dataCollected?.transferred === "true"
   ) {
     return {
@@ -119,8 +123,8 @@ export function analyzeOutcome(data: PostCallData): CallOutcome {
     };
   }
 
-  // Rule 5: Follow-up booked
-  if (textContainsAny(fullText, BOOKING_PHRASES) && analysis?.callSuccessful === true) {
+  // Rule 5: Follow-up booked (check prospect text for booking intent)
+  if (textContainsAny(prospectText, BOOKING_PHRASES) && analysis?.callSuccessful === true) {
     return {
       disposition: "follow_up_booked",
       dnrRequested: false,

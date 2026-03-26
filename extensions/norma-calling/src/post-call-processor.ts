@@ -51,9 +51,6 @@ export class PostCallProcessor {
       };
     }
 
-    // Mark as processed immediately to prevent concurrent duplicates
-    this.store.markWebhookProcessed(callId);
-
     // Analyze call outcome
     const outcome = analyzeOutcome(postCallData);
 
@@ -82,6 +79,9 @@ export class PostCallProcessor {
       hubspotCallId: hubspotResult.callEngagementId,
       hubspotNoteId: hubspotResult.noteId,
     });
+
+    // Mark as processed only after successful completion
+    this.store.markWebhookProcessed(callId);
 
     return { outcome, hubspotResult };
   }
