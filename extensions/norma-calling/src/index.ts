@@ -18,6 +18,7 @@ export {
 } from "./hubspot-logger.js";
 export { CallStore } from "./call-store.js";
 export { PostCallProcessor } from "./post-call-processor.js";
+export { findUnprocessedCalls, processCompletedCalls } from "./post-call-bridge.js";
 export type {
   CallDisposition,
   CallOutcome,

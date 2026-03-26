@@ -416,9 +416,67 @@ export class VoiceCallWebhookServer {
     for (const event of events) {
       try {
         this.manager.processEvent(event);
+
+        // Drive the conversation loop for non-streaming providers (e.g. Telnyx).
+        // Streaming providers handle this via MediaStreamHandler callbacks.
+        if (!this.config.streaming.enabled) {
+          this.driveWebhookConversation(event).catch((err) => {
+            console.warn(`[voice-call] Conversation driver error:`, err);
+          });
+        }
       } catch (err) {
         console.error(`[voice-call] Error processing event ${event.type}:`, err);
       }
+    }
+  }
+
+  /**
+   * Drive the conversation loop for webhook-based (non-streaming) providers.
+   * After TTS finishes (call.active from speak.ended), start listening.
+   * After user speaks (call.speech), generate AI response and speak it.
+   */
+  private async driveWebhookConversation(event: NormalizedEvent): Promise<void> {
+    const call = this.manager.getCall(event.callId);
+    if (!call) {
+      return;
+    }
+
+    const callMode = call.metadata?.mode as string | undefined;
+    if (callMode !== "conversation") {
+      return;
+    }
+
+    const provider = this.manager.getProvider();
+    if (!provider || !call.providerCallId) {
+      return;
+    }
+
+    // After TTS finishes playing, start listening for user speech
+    if (event.type === "call.active") {
+      console.log(`[voice-call] Conversation: TTS finished for ${call.callId}, starting listener`);
+      try {
+        await provider.startListening({
+          callId: call.callId,
+          providerCallId: call.providerCallId,
+        });
+      } catch (err) {
+        console.warn(`[voice-call] Failed to start listening after speak:`, err);
+      }
+      return;
+    }
+
+    // After user speaks, generate AI response and speak it
+    if (event.type === "call.speech" && "transcript" in event && event.isFinal) {
+      console.log(`[voice-call] Conversation: user said "${event.transcript}" on ${call.callId}`);
+      try {
+        await provider.stopListening({
+          callId: call.callId,
+          providerCallId: call.providerCallId,
+        });
+      } catch {
+        // Best-effort stop
+      }
+      await this.handleInboundResponse(call.callId, event.transcript);
     }
   }
 
